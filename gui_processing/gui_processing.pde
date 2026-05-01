@@ -23,6 +23,7 @@ int FRAMERATE = 60;
 
 // Game variables
 int player = 0;
+int turn = 1;
 int curr_x, curr_y;
 int rotate_ctr = 0, x_ctr = 0, y_ctr = 0;
 int x_left, x_right, y_top, y_bottom;
@@ -279,6 +280,15 @@ void draw()
               p2_bs = encodeBoardState();
               println("Encoded board state: ", p2_bs);
             }
+            
+            if (turn == player) {
+              port.write('Y');
+              port.write('\n');
+            }
+            else {
+              port.write('N');
+              port.write('\n');
+            }
           }
         }
       }
@@ -300,6 +310,15 @@ void draw()
       input_1 = port.read();
       input_2 = port.read();
       println("Input: ", input_1, " ", input_2);
+      
+      if (!guess_grid[input_1][input_2]) {
+        guess_grid[input_1][input_2] = true;
+        boolean is_burning = burnCheck(input_1, input_2);
+        port.write(input_1 + " " + input_2 + " " + ((is_burning) ? "1" : "0"));
+        port.write('N');
+        port.write('\n');
+      }
+      input_1 = input_2 = 0;
     }
     
     String write_s = "", read_s = "";
@@ -310,7 +329,7 @@ void draw()
     drawShips();
     text("Guessing Phase", CANVAS_X/2, MARGIN/2);
     int time = 16 - ((frameCount % (FRAMERATE*16)) / FRAMERATE);
-    msg = "Sending guess to server in " + time + " seconds";
+    msg = "Player " + turn + ": " + time + " seconds";
     text(msg, CANVAS_X/2, MARGIN);
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
@@ -320,26 +339,31 @@ void draw()
       println("Sending to: " + write_s);
       println("Reponse Content: " + write_req.getContent());
       println("Reponse Content-Length Header: " + write_req.getHeader("Content-Length"));
+      turn = (turn == 1) ? 2 : 1;
+      println("Player " + turn + "'s turn");
+      if (turn == player) {
+        port.write('Y');
+        port.write('\n');
+      }
+      else {
+        port.write('N');
+        port.write('\n');
+      }
     }
     
     if (frameCount % FRAMERATE == 0) {
       JSONArray feeds = (loadJSONObject(read_s)).getJSONArray("feeds");
       JSONObject latest_entry = feeds.getJSONObject(0, null);
-      p1_gs = latest_entry.getString("field1", p1_gs);
-      p2_gs = latest_entry.getString("field2", p2_gs);
-      p1_bs = latest_entry.getString("field3", p1_bs);
-      p2_bs = latest_entry.getString("field4", p2_bs);
-      p1_g = latest_entry.getString("field5", p1_g);
-      p2_g = latest_entry.getString("field6", p2_g);
-      println("Received: " + p1_gs + " " + p2_gs + " " + p1_bs + " " + p2_bs + " " + p1_g + " " + p2_g);
+      if (latest_entry != null) {
+        p1_gs = latest_entry.getString("field1", p1_gs);
+        p2_gs = latest_entry.getString("field2", p2_gs);
+        p1_bs = latest_entry.getString("field3", p1_bs);
+        p2_bs = latest_entry.getString("field4", p2_bs);
+        p1_g = latest_entry.getString("field5", p1_g);
+        p2_g = latest_entry.getString("field6", p2_g);
+        println("Received: " + p1_gs + " " + p2_gs + " " + p1_bs + " " + p2_bs + " " + p1_g + " " + p2_g);
+      }
     }
-    
-    if (!guess_grid[input_1][input_2]) {
-      guess_grid[input_1][input_2] = true;
-      boolean is_burning = burnCheck(input_1, input_2);
-      port.write(input_1 + " " + input_2 + " " + ((is_burning) ? "1" : "0"));
-    }
-    input_1 = input_2 = 0;
   }
   
   // end phase
