@@ -20,7 +20,6 @@ int FRAMERATE = 60;
 
 // Game variables
 int curr_x, curr_y;
-int x_read, y_read, button_press;
 int rotate_ctr = 0, x_ctr = 0, y_ctr = 0;
 int x_left, x_right, y_top, y_bottom;
 int curr_ships = 0;
@@ -44,7 +43,7 @@ char ROTATE_KEY = 'r';
 char LEFT_KEY = 'a', RIGHT_KEY = 'd', UP_KEY = 'w', DOWN_KEY = 's';
 
 // Joystick variables
-int JOYSTICK_SENS = 20;
+int input_1, input_2;
 
 void precomp() {
   DOT_OFFSET_X = (CANVAS_X - MARGIN*2) / (DOT_X*2);
@@ -104,7 +103,7 @@ void settings() {
 public void setup()
 {
   // Open the port that the board is connected to and use the same speed (9600 bps)
-  // port = new Serial(this, Serial.list()[0], 9600);
+  port = new Serial(this, Serial.list()[0], 9600);
   
   precomp();
   frameRate(FRAMERATE);
@@ -124,27 +123,32 @@ public void setup()
 
 void draw() 
 { 
-  // get input from joystick
-  /**
-  while (port.available() > 2) {
-    x_read = port.read();
-    y_read = port.read();
-    button_press = port.read();
-  }*/
-  
   // loading screen
   if (GAMESTATE == 0) {
+    // get input from joystick
+    while (port.available() > 0) {
+      input_1 = port.read();
+      println("Input: ", input_1);
+    }
+  
     image(loadingImage, 0, 0);
     loadingImage.resize(CANVAS_X, CANVAS_Y);
-    if (button_press == 1) GAMESTATE = 1;
-    if (keyPressed) {
-       if (key == ENTER_KEY) GAMESTATE = 1;
+    if (input_1 == 'C') GAMESTATE = 1;
+    if ((keyPressed) || (input_1 != 0)) {
+       if ((key == ENTER_KEY) || (input_1 == 'R')) GAMESTATE = 1;
        key = 0;
+       input_1 = 0;
     }
   }
   
   // setup phase
   else if (GAMESTATE == 1) {
+    // get input from joystick
+    while (port.available() > 0) {
+      input_1 = port.read();
+      println("Input: ", input_1);
+    }
+    
     // redraw grid with ship
     drawGrid();
     drawShips();
@@ -172,33 +176,31 @@ void draw()
     rotate(HALF_PI*rotate_ctr); 
     if (rotate_ctr == 0) image(ShipImages[curr_ships], 0, 0, DOT_GAP_X*SHIP_SIZES[curr_ships], DOT_GAP_Y);
     else image(ShipImages[curr_ships], 0, 0, DOT_GAP_Y*SHIP_SIZES[curr_ships], DOT_GAP_X);
-    popMatrix();
+    popMatrix(); 
     
-    
-    
-    if ((keyPressed)) {
-      if (key == ROTATE_KEY) rotate_ctr = (rotate_ctr <= 0) ? 1 : 0;
-      else if ((key == LEFT_KEY) || (x_read < -JOYSTICK_SENS)) {
+    if ((keyPressed) || (input_1 != 0)) {
+      if ((key == ROTATE_KEY) || (input_1 == 'R')) rotate_ctr = (rotate_ctr <= 0) ? 1 : 0;
+      else if ((key == LEFT_KEY) || (input_1 == 'l')) {
         x_ctr--;
         x_left -= DOT_GAP_X;
         x_right -= DOT_GAP_X;
       }
-      else if ((key == RIGHT_KEY) || (x_read > JOYSTICK_SENS)) {
+      else if ((key == RIGHT_KEY) || (input_1 == 'r')) {
         x_ctr++;
         x_left += DOT_GAP_X;
         x_right += DOT_GAP_X;
       }
-      else if ((key == UP_KEY) || (y_read < -JOYSTICK_SENS)) {
+      else if ((key == UP_KEY) || (input_1 == 'u')) {
         y_ctr--;
         y_top -= DOT_GAP_Y;
         y_bottom -= DOT_GAP_Y;
       }
-      else if ((key == DOWN_KEY) || (y_read > JOYSTICK_SENS)) {
+      else if ((key == DOWN_KEY) || (input_1 == 'd')) {
         y_ctr++;
         y_top += DOT_GAP_Y;
         y_bottom += DOT_GAP_Y;
       }
-      else if ((key == ENTER_KEY)) {
+      else if ((key == ENTER_KEY) || (input_1 == 'C')) {
         // check for collisions
         boolean valid = true;
         if (rotate_ctr == 0) {
@@ -246,16 +248,25 @@ void draw()
       if (y_top < MARGIN) y_ctr++;
       if (y_bottom > CANVAS_Y - MARGIN) y_ctr--;
       key = 0;
+      input_1 = 0;
     }
   }
   
   // guessing phase
   else if (GAMESTATE == 2) {
+    // get input from joystick
+    while (port.available() > 1) {
+      input_1 = port.read();
+      input_2 = port.read();
+      println("Input: ", input_1, " ", input_2);
+    }
+    
     drawGrid();
     drawShips();
     text("Guessing Phase", CANVAS_X/2, MARGIN/2);
     int time = 16 - ((frameCount % (FRAMERATE*16)) / FRAMERATE);
     msg = "Requesting guess from server in " + time + " seconds";
+    println(msg);
     text(msg, CANVAS_X/2, MARGIN);
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
@@ -266,7 +277,11 @@ void draw()
       println("Reponse Content: " + get.getContent());
       println("Reponse Content-Length Header: " + get.getHeader("Content-Length"));
     }
-    
+    input_1 = input_2 = 0;
+  }
+  
+  // end phase
+  else if (GAMESTATE == 3) {
     
   }
 }
