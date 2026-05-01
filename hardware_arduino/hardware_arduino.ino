@@ -30,6 +30,8 @@ unsigned long buttonPress;
 
 // 0 = planning phase, 1 = guess phase
 bool gameState = false;
+bool turn = false;
+
 String input = "";
 
 void setup() {
@@ -40,7 +42,9 @@ void setup() {
 
 void loop() {
   readSerial();
-  readSensors();
+
+  if (!gameState || turn == true)
+    readSensors();
 
   if (gameState) {
     refreshScreen();
@@ -67,6 +71,7 @@ void processCommand(String cmd) {
 
   if (cmd[0] == 'G') {
     gameState = true;
+    x = 0; y = 0; // reset cursor
   }
   else if (cmd[0] == 'R') {
     gameState = false;
@@ -74,6 +79,13 @@ void processCommand(String cmd) {
     memset(frame, 0, sizeof(frame));
     memset(burning, 0, sizeof(burning));
     matrix.renderBitmap(frame, 8, 12);
+  }
+  else if (cmd[0] == 'Y') {
+    turn = true;
+    x = 0; y = 0; // reset cursor
+  }
+  else if (cmd[0] == 'N') {
+    turn = false;
   }
   else if (gameState) {
     int l, m, n;
@@ -102,8 +114,8 @@ void readSensors() {
 
     if (gameState == true) {
       guess[y][x] = 1;
-      Serial.print(x);
-      Serial.println(y); 
+      Serial.write(x);
+      Serial.write(y); 
     } else {
       buttonPress = millis();
       pressButtonState = HIGH; // mark as pressed
@@ -114,10 +126,10 @@ void readSensors() {
   // RISING EDGE (release)
   if (lastButtonState == LOW && currentButtonState == HIGH && gameState == false) {
     // check if 2 seconds have passed
-    if ((millis() - buttonPress) > 1500 && pressButtonState == HIGH) {
-      Serial.println("C");
+    if ((millis() - buttonPress) > 1000 && pressButtonState == HIGH) {
+      Serial.print("C");
     } else {
-      Serial.println("R");
+      Serial.print("R");
     }
     pressButtonState = LOW;
   }
@@ -133,11 +145,11 @@ void readSensors() {
   static int prev_dx = 0;
   static int prev_dy = 0;
 
-  if (!gameState && (dx != prev_dx || dy != prev_dy)) {
-    if (dx == -1) Serial.println("l");
-    else if (dx == 1) Serial.println("r");
-    else if (dy == -1) Serial.println("u");
-    else if (dy == 1) Serial.println("d");
+  if (!gameState && (dx != prev_dx || dy != prev_dy) && !pressButtonState) {
+    if (dx == -1) Serial.print("l");
+    else if (dx == 1) Serial.print("r");
+    else if (dy == -1) Serial.print("u");
+    else if (dy == 1) Serial.print("d");
   }
 
   prev_dx = dx;
@@ -168,10 +180,12 @@ void refreshScreen() {
   }
 
   // draw cursor
-  if (millis() % 1000 < 500)
-    frame[y][x] = 1;
-  else
-    frame[y][x] = 0;
+  if (turn) {
+    if (millis() % 1000 < 500)
+      frame[y][x] = 1;
+    else
+      frame[y][x] = 0;
+  }
 
   matrix.renderBitmap(frame, 8, 12);
 }
