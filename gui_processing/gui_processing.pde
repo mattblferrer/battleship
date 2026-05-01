@@ -3,7 +3,9 @@ import processing.serial.*;
 
 // Communication variables
 Serial port;
-String tskey = "";
+String write_key = "K0M5M9E5SKGYF15A";
+String read_key = "7HS7C4DNV6P9EPE4";
+String p1_gs, p2_gs, p1_bs, p2_bs, p1_g, p2_g;
 
 // Game constants
 int CANVAS_X = 900;
@@ -19,6 +21,7 @@ int SHIP_SIZES[] = {2, 3, 4};
 int FRAMERATE = 60;
 
 // Game variables
+int player = 0;
 int curr_x, curr_y;
 int rotate_ctr = 0, x_ctr = 0, y_ctr = 0;
 int x_left, x_right, y_top, y_bottom;
@@ -94,6 +97,10 @@ void parseBoardState(String state) {
   }
 }
 
+boolean burnCheck(int x, int y) {
+  return (opp_grid[x][y] != 0);
+}
+
 void settings() {
   size(CANVAS_X, CANVAS_Y);
   smooth();
@@ -125,6 +132,9 @@ void draw()
 { 
   // loading screen
   if (GAMESTATE == 0) {
+    port.write('R');
+    port.write('\n');
+    
     // get input from joystick
     while (port.available() > 0) {
       input_1 = port.read();
@@ -133,9 +143,15 @@ void draw()
   
     image(loadingImage, 0, 0);
     loadingImage.resize(CANVAS_X, CANVAS_Y);
-    if (input_1 == 'C') GAMESTATE = 1;
     if ((keyPressed) || (input_1 != 0)) {
-       if ((key == ENTER_KEY) || (input_1 == 'R')) GAMESTATE = 1;
+       if ((key == UP_KEY) || (input_1 == 'u')) {
+         GAMESTATE = 1;
+         player = 1;
+       }
+       if ((key == DOWN_KEY) || (input_1 == 'd')) {
+         GAMESTATE = 1;
+         player = 2;
+       }
        key = 0;
        input_1 = 0;
     }
@@ -154,7 +170,7 @@ void draw()
     drawShips();
     pushMatrix();
     
-    text("Setup Phase", CANVAS_X/2, MARGIN/2);
+    text("Player " + player + " Setup Phase", CANVAS_X/2, MARGIN/2);
     
     if (rotate_ctr == 0) {
       curr_x = MARGIN + x_ctr*DOT_GAP_X;
@@ -238,7 +254,11 @@ void draw()
           y_ctr = 0;
           curr_ships++;
           
-          if (curr_ships >= SHIP_NUMBER) GAMESTATE = 2;
+          if (curr_ships >= SHIP_NUMBER) {
+            GAMESTATE = 2;
+            port.write('G');
+            port.write('\n');
+          }
         }
       }
       
@@ -266,17 +286,28 @@ void draw()
     text("Guessing Phase", CANVAS_X/2, MARGIN/2);
     int time = 16 - ((frameCount % (FRAMERATE*16)) / FRAMERATE);
     msg = "Requesting guess from server in " + time + " seconds";
-    println(msg);
     text(msg, CANVAS_X/2, MARGIN);
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
-    if (frameCount % (FRAMERATE*16) == 0) {
-      String s = "http://api.thingspeak.com/update?api_key="+tskey;
-      GetRequest get = new GetRequest(s);
+    if (frameCount % (FRAMERATE*16) == 0) {      
+      String write_s = "", read_s = "";
+      if (player == 1) {
+        write_s = "http://api.thingspeak.com/update?api_key="+write_key+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
+        read_s = "http://api.thingspeak.com/update?api_key="+read_key+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
+      }
+      else if (player == 2) {
+        write_s = "http://api.thingspeak.com/update?api_key="+write_key+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
+        read_s = "http://api.thingspeak.com/update?api_key="+read_key+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
+      }
+      GetRequest get = new GetRequest(write_s);
       get.send();
       println("Reponse Content: " + get.getContent());
       println("Reponse Content-Length Header: " + get.getHeader("Content-Length"));
     }
+    
+    boolean is_burning = burnCheck(input_1, input_2);
+    port.write(input_1 + ' ' + input_2 + ' ' + ((is_burning) ? '1' : '0'));
+    
     input_1 = input_2 = 0;
   }
   
