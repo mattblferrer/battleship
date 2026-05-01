@@ -5,7 +5,8 @@ import processing.serial.*;
 Serial port;
 String write_key = "K0M5M9E5SKGYF15A";
 String read_key = "7HS7C4DNV6P9EPE4";
-String p1_gs, p2_gs, p1_bs, p2_bs, p1_g, p2_g;
+int channel = 3364309;
+String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 
 // Game constants
 int CANVAS_X = 900;
@@ -95,6 +96,18 @@ void parseBoardState(String state) {
       opp_grid[i][j] = (state.charAt(i*DOT_X + j) - 'a' + 1);
     }
   }
+}
+
+String encodeBoardState() {
+  String ans = "";
+  for (int i = 0; i < DOT_X; i++) {
+    for (int j = 0; j < DOT_Y; j++) {
+      if (ship_grid[i][j] == 0) ans += '0';
+      else ans += (char)(ship_grid[i][j] + 'a' - 1);
+    }
+  }
+  println(ans);
+  return ans;
 }
 
 boolean burnCheck(int x, int y) {
@@ -258,6 +271,14 @@ void draw()
             GAMESTATE = 2;
             port.write('G');
             port.write('\n');
+            if (player == 1) {
+              p1_bs = encodeBoardState();
+              println("Encoded board state: ", p1_bs);
+            }
+            else if (player == 2) {
+              p2_bs = encodeBoardState();
+              println("Encoded board state: ", p2_bs);
+            }
           }
         }
       }
@@ -281,33 +302,43 @@ void draw()
       println("Input: ", input_1, " ", input_2);
     }
     
+    String write_s = "", read_s = "";
+    write_s = "https://api.thingspeak.com/update?api_key="+write_key+"&field1="+p1_gs+"&field2="+p2_gs+"&field3="+p1_bs+"&field4="+p2_bs+"&field5="+p1_g+"&field6="+p2_g;
+    read_s = "https://api.thingspeak.com/channels/3364309/feeds.json?results=1";
+
     drawGrid();
     drawShips();
     text("Guessing Phase", CANVAS_X/2, MARGIN/2);
     int time = 16 - ((frameCount % (FRAMERATE*16)) / FRAMERATE);
-    msg = "Requesting guess from server in " + time + " seconds";
+    msg = "Sending guess to server in " + time + " seconds";
     text(msg, CANVAS_X/2, MARGIN);
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
     if (frameCount % (FRAMERATE*16) == 0) {      
-      String write_s = "", read_s = "";
-      if (player == 1) {
-        write_s = "http://api.thingspeak.com/update?api_key="+write_key+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
-        read_s = "http://api.thingspeak.com/update?api_key="+read_key+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
-      }
-      else if (player == 2) {
-        write_s = "http://api.thingspeak.com/update?api_key="+write_key+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
-        read_s = "http://api.thingspeak.com/update?api_key="+read_key+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
-      }
-      GetRequest get = new GetRequest(write_s);
-      get.send();
-      println("Reponse Content: " + get.getContent());
-      println("Reponse Content-Length Header: " + get.getHeader("Content-Length"));
+      GetRequest write_req = new GetRequest(write_s);
+      write_req.send();
+      println("Sending to: " + write_s);
+      println("Reponse Content: " + write_req.getContent());
+      println("Reponse Content-Length Header: " + write_req.getHeader("Content-Length"));
     }
     
-    boolean is_burning = burnCheck(input_1, input_2);
-    port.write(input_1 + ' ' + input_2 + ' ' + ((is_burning) ? '1' : '0'));
+    if (frameCount % FRAMERATE == 0) {
+      JSONArray feeds = (loadJSONObject(read_s)).getJSONArray("feeds");
+      JSONObject latest_entry = feeds.getJSONObject(0, null);
+      p1_gs = latest_entry.getString("field1", p1_gs);
+      p2_gs = latest_entry.getString("field2", p2_gs);
+      p1_bs = latest_entry.getString("field3", p1_bs);
+      p2_bs = latest_entry.getString("field4", p2_bs);
+      p1_g = latest_entry.getString("field5", p1_g);
+      p2_g = latest_entry.getString("field6", p2_g);
+      println("Received: " + p1_gs + " " + p2_gs + " " + p1_bs + " " + p2_bs + " " + p1_g + " " + p2_g);
+    }
     
+    if (!guess_grid[input_1][input_2]) {
+      guess_grid[input_1][input_2] = true;
+      boolean is_burning = burnCheck(input_1, input_2);
+      port.write(input_1 + " " + input_2 + " " + ((is_burning) ? "1" : "0"));
+    }
     input_1 = input_2 = 0;
   }
   
