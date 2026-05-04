@@ -94,10 +94,13 @@ void drawShips() {
 }
 
 void drawGuessed() { 
+  int cx, cy;
   for (int i = 0; i < DOT_Y; i++) {
     for (int j = 0; j < DOT_X; j++) { 
+      cx = MARGIN + j*DOT_GAP_X;
+      cy = MARGIN + i*DOT_GAP_Y;
       fill(100, 0, 0);
-      ellipse(i, j, DOT_SIZE, DOT_SIZE);
+      if ((opp_guess_grid[i][j] == true) && (opp_grid[i][j] != '0')) ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
       fill(100);
     }
   }
