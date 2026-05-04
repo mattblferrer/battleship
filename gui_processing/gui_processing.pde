@@ -49,7 +49,6 @@ PImage loadingImage, burningImage, wonImage, lostImage;
 PFont font;
 String msg;
 boolean playerWon = false;
-boolean playerLost = false;
 
 // Keyboard variables
 char ENTER_KEY = 10;
@@ -437,7 +436,11 @@ void draw()
   
   // end phase
   else if (GAMESTATE == 3) {
-    image(wonImage, 0, 0);
-    loadingImage.resize(CANVAS_X, CANVAS_Y);
-  }
+    if (playerWon) {
+      image(wonImage, 0, 0);
+      wonImage.resize(CANVAS_X, CANVAS_Y);
+    } else {
+      image(lostImage, 0, 0);
+      lostImage.resize(CANVAS_X, CANVAS_Y);
+    }
 }
