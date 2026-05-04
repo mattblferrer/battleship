@@ -331,7 +331,6 @@ void draw()
     }
     
     String write_s = "", read_s = "";
-    write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field2="+p2_gs+"&field3="+p1_bs+"&field4="+p2_bs+"&field5="+p1_g+"&field6="+p2_g;
     read_s = "https://api.thingspeak.com/channels/3364309/feeds.json?results=1";
 
     drawGrid();
@@ -346,6 +345,8 @@ void draw()
       if (player == 1) p1_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
       else if (player == 2) p2_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
       
+      if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
+      else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
       GetRequest write_req = new GetRequest(write_s);
       write_req.send();
       println("Sending to: " + write_s);
