@@ -8,7 +8,6 @@ String WRITE_KEY_P1 = "K0M5M9E5SKGYF15A";
 String WRITE_KEY_P2 = "79ZR9765YVIEVIS6";
 int CHANNEL_P1 = 3364309;
 int CHANNEL_P2 = 3368248;
-int CHANNEL_P2 = 3368248;
 String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 
 // Game constants
@@ -407,9 +406,9 @@ void draw()
       
       if (player == 1) {
         if (latest_entry_2 != null) {
-          p2_gs = latest_entry.getString("field2", p2_gs);
-          p2_bs = latest_entry.getString("field4", p2_bs);
-          p2_g = latest_entry.getString("field6", p2_g);
+          p2_gs = latest_entry_2.getString("field2", p2_gs);
+          p2_bs = latest_entry_2.getString("field4", p2_bs);
+          p2_g = latest_entry_2.getString("field6", p2_g);
           println("Received: " + p2_gs + " " + p2_bs + " " + p2_g);
         }
         parseBoardState(p2_bs);
