@@ -7,7 +7,7 @@ String WRITE_KEY_P1 = "K0M5M9E5SKGYF15A";
 //String READ_KEY_P1 = "7HS7C4DNV6P9EPE4";
 String WRITE_KEY_P2 = "79ZR9765YVIEVIS6";
 int CHANNEL_P1 = 3364309;
-int CHANNEL_P2 = 3368258;
+int CHANNEL_P2 = 3368248;
 String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 
 // Game constants
@@ -115,7 +115,7 @@ void drawGuessed() {
       fill(255, 0, 0);
       if (opp_guess_grid[i][j] == true) {
         if (opp_grid[i][j] != 0) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
-        else ellipse(cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
+        else ellipse(cx, cy, DOT_SIZE*3, DOT_SIZE*3);
       }
       fill(100);
     }
@@ -344,7 +344,7 @@ void draw()
             
             String write_s1 = "";
             if (player == 1) write_s1 = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field2=&field4=&field6=";
-            else if (player == 2) write_s1 = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field1=&field3=&field5=";
+            else if (player == 2) write_s1 = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P2+"&field1=&field3=&field5=";
             GetRequest write_req = new GetRequest(write_s1);
             write_req.send();
           }
@@ -461,4 +461,5 @@ void draw()
       image(lostImage, 0, 0);
       lostImage.resize(CANVAS_X, CANVAS_Y);
     }
+  } 
 }
