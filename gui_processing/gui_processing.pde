@@ -36,8 +36,10 @@ int opp_x, opp_y, opp_burning;
 
 // File and display variables
 String[] SHIP_FILES = new String[SHIP_NUMBER];
+String[] SUNK_FILES = new String[SHIP_NUMBER];
 String LOADING_FILE = "screen_loading.png";
 PImage[] ShipImages = new PImage[SHIP_NUMBER];
+PImage[] SunkImages = new PImage[SHIP_NUMBER];
 PImage loadingImage;
 PFont font;
 String msg;
@@ -141,7 +143,11 @@ public void setup()
   SHIP_FILES[0] = "2x1_ship.png";
   SHIP_FILES[1] = "3x1_ship.png";
   SHIP_FILES[2] = "4x1_ship.png";
+  SUNK_FILES[0] = "2x1_sunk.png";
+  SUNK_FILES[1] = "3x1_sunk.png";
+  SUNK_FILES[2] = "4x1_sunk.png";
   for (int i = 0; i < SHIP_NUMBER; i++) ShipImages[i] = loadImage(SHIP_FILES[i]);
+  for (int i = 0; i < SHIP_NUMBER; i++) SunkImages[i] = loadImage(SHIP_FILES[i]);
   loadingImage = loadImage(LOADING_FILE);
   
   font = createFont("Arial", MARGIN/2, true);
@@ -392,6 +398,8 @@ void draw()
         fill(100, 0, 0);
         ellipse(opp_x, opp_y, DOT_SIZE, DOT_SIZE);
         fill(100);
+        
+        // add burning images here
       }
     }
   }
