@@ -110,7 +110,10 @@ void drawGuessed() {
       cx = MARGIN + j*DOT_GAP_X + DOT_OFFSET_X;
       cy = MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y;
       fill(255, 0, 0);
-      if ((opp_guess_grid[i][j] == true) && (opp_grid[i][j] != '0')) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4); // ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
+      if (opp_guess_grid[i][j] == true) {
+        if (opp_grid[i][j] != '0') image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
+        else ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
+      }
       fill(100);
     }
   }
@@ -380,26 +383,7 @@ void draw()
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
     if (frameCount % (FRAMERATE*16) == 0) {         
-      if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
-      else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
-      GetRequest write_req = new GetRequest(write_s);
-      write_req.send();
-      println("Sending to: " + write_s);
-      println("Reponse Content: " + write_req.getContent());
-      println("Reponse Content-Length Header: " + write_req.getHeader("Content-Length"));
-      turn = (turn == 1) ? 2 : 1;
-      println("Player " + turn + "'s turn");
-      if (turn == player) {
-        port.write('Y');
-        port.write('\n');
-      }
-      else {
-        port.write('N');
-        port.write('\n');
-      }
-    }
-    
-    if (frameCount % (FRAMERATE*8) == 0) {
+      // Read
       JSONArray feeds = (loadJSONObject(read_s)).getJSONArray("feeds");
       JSONObject latest_entry = feeds.getJSONObject(0, null);
       
@@ -424,6 +408,25 @@ void draw()
         parseGuess(p1_g);
       }
       opp_guess_grid[opp_y][opp_x] = true;
+      
+      // Write
+      if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
+      else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
+      GetRequest write_req = new GetRequest(write_s);
+      write_req.send();
+      println("Sending to: " + write_s);
+      println("Reponse Content: " + write_req.getContent());
+      println("Reponse Content-Length Header: " + write_req.getHeader("Content-Length"));
+      turn = (turn == 1) ? 2 : 1;
+      println("Player " + turn + "'s turn");
+      if (turn == player) {
+        port.write('Y');
+        port.write('\n');
+      }
+      else {
+        port.write('N');
+        port.write('\n');
+      }
     }
   }
   
