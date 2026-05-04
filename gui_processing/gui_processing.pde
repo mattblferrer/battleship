@@ -29,9 +29,10 @@ int rotate_ctr = 0, x_ctr = 0, y_ctr = 0;
 int x_left, x_right, y_top, y_bottom;
 int curr_ships = 0;
 int[][] ship_details = new int[SHIP_NUMBER][3];
-int[][] ship_grid = new int[DOT_X][DOT_Y];
-int[][] opp_grid = new int[DOT_X][DOT_Y];
-boolean[][] guess_grid = new boolean[DOT_X][DOT_Y];
+int[][] ship_grid = new int[DOT_Y][DOT_X];
+int[][] opp_grid = new int[DOT_Y][DOT_X];
+boolean[][] guess_grid = new boolean[DOT_Y][DOT_X];
+boolean[][] opp_guess_grid = new boolean[DOT_Y][DOT_X];
 int opp_x, opp_y, opp_burning;
 
 // File and display variables
@@ -87,6 +88,16 @@ void drawShips() {
     if (ship_details[i][2] == 0) image(ShipImages[i], 0, 0, DOT_GAP_X*SHIP_SIZES[i], DOT_GAP_Y);
     else image(ShipImages[i], 0, 0, DOT_GAP_Y*SHIP_SIZES[i], DOT_GAP_X);
     popMatrix();
+  }
+}
+
+void drawGuessed() { 
+  for (int i = 0; i < DOT_Y; i++) {
+    for (int j = 0; j < DOT_X; j++) { 
+      fill(100, 0, 0);
+      ellipse(i, j, DOT_SIZE, DOT_SIZE);
+      fill(100);
+    }
   }
 }
 
@@ -326,6 +337,8 @@ void draw()
         is_burning = burnCheck(input_1, input_2);
         port.write(input_1 + " " + input_2 + " " + ((is_burning) ? "1" : "0"));
         port.write("\nN\n");
+        if (player == 1) p1_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
+        else if (player == 2) p2_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
       }
       input_1 = input_2 = 0;
     }
@@ -335,16 +348,14 @@ void draw()
 
     drawGrid();
     drawShips();
+    drawGuessed();
     text("Guessing Phase", CANVAS_X/2, MARGIN/2);
     int time = 16 - ((frameCount % (FRAMERATE*16)) / FRAMERATE);
     msg = "Player " + turn + ": " + time + " seconds";
     text(msg, CANVAS_X/2, MARGIN);
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
-    if (frameCount % (FRAMERATE*16) == 0) {      
-      if (player == 1) p1_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
-      else if (player == 2) p2_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
-      
+    if (frameCount % (FRAMERATE*16) == 0) {         
       if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
       else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
       GetRequest write_req = new GetRequest(write_s);
@@ -388,11 +399,7 @@ void draw()
         parseBoardState(p1_bs);
         parseGuess(p1_g);
       }
-      if (opp_burning == 'b') {
-        fill(100, 0, 0);
-        ellipse(opp_x, opp_y, DOT_SIZE, DOT_SIZE);
-        fill(100);
-      }
+      opp_guess_grid[opp_y][opp_x] = true;
     }
   }
   
