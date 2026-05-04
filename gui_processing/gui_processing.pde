@@ -122,8 +122,6 @@ void drawGuessed() {
   }
 }
 
-void draw
-
 void parseBoardState(String state) {
   if (state.length() < DOT_X*DOT_Y) return;
   for (int i = 0; i < DOT_Y; i++) {
@@ -436,17 +434,18 @@ void draw()
       }
       
       // Check if all opp ships have sunk
+      boolean iWon = true;
       for (int i = 0; i < SHIP_NUMBER; i++) {
-        if (opp_hits[i] >= SHIP_SIZES[i]) {
-          iWon = true;
+        if (opp_hits[i] < SHIP_SIZES[i]) {
+          iWon = false;
           break;
         }
       }
       
       // Player triggers win condition
-      if (GAMESTATE != 3 && iWon) {
-        if (player == 1) p2_gs = "3";
-        else if (player == 1) p2_gs = "3";
+      if (iWon) {
+        if (player == 1) p1_gs = "3";
+        else if (player == 2) p2_gs = "3";
         playerWon = true;
         GAMESTATE = 3;
       }
