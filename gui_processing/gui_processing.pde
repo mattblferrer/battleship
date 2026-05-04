@@ -3,9 +3,11 @@ import processing.serial.*;
 
 // Communication variables
 Serial port;
-String WRITE_KEY = "K0M5M9E5SKGYF15A";
-String READ_KEY = "7HS7C4DNV6P9EPE4";
-int CHANNEL = 3364309;
+String WRITE_KEY_P1 = "K0M5M9E5SKGYF15A";
+//String READ_KEY_P1 = "7HS7C4DNV6P9EPE4";
+String WRITE_KEY_P2 = "79ZR9765YVIEVIS6";
+int CHANNEL_P1 = 3364309;
+int CHANNEL_P2 = 3368258;
 String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 
 // Game constants
@@ -91,7 +93,7 @@ void drawShips() {
     }
     translate(cx, cy);
     rotate(HALF_PI*ship_details[i][2]); 
-    if (opp_hits[i] == SHIP_SIZES[i]) {
+    if (opp_hits[i] >= SHIP_SIZES[i]) {
       if (ship_details[i][2] == 0) image(SunkImages[i], 0, 0, DOT_GAP_X*SHIP_SIZES[i], DOT_GAP_Y);
       else image(SunkImages[i], 0, 0, DOT_GAP_Y*SHIP_SIZES[i], DOT_GAP_X);
     }
@@ -111,8 +113,8 @@ void drawGuessed() {
       cy = MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y;
       fill(255, 0, 0);
       if (opp_guess_grid[i][j] == true) {
-        if (opp_grid[i][j] != 0) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
-        else ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
+        if (opp_grid[i][j] == 0) ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
+        else image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
       }
       fill(100);
     }
@@ -123,9 +125,13 @@ void parseBoardState(String state) {
   if (state.length() < DOT_X*DOT_Y) return;
   for (int i = 0; i < DOT_Y; i++) {
     for (int j = 0; j < DOT_X; j++) {
-      if (state.charAt(i*DOT_Y + j) == '0') continue;
-      opp_grid[i][j] = (state.charAt(i*DOT_Y + j) - 'a' + 1);
+      opp_grid[i][j] = 0;
+      if (state.charAt(i*DOT_X + j) == '0') {
+        continue;
+      }
+      opp_grid[i][j] = (state.charAt(i*DOT_X + j) - 'a' + 1);
     }
+    println();
   }
 }
 
@@ -137,7 +143,6 @@ String encodeBoardState() {
       else ans += (char)(ship_grid[i][j] + 'a' - 1);
     }
   }
-  println(ans);
   return ans;
 }
 
@@ -174,7 +179,7 @@ public void setup()
   SUNK_FILES[1] = "3x1_sunk.png";
   SUNK_FILES[2] = "4x1_sunk.png";
   for (int i = 0; i < SHIP_NUMBER; i++) ShipImages[i] = loadImage(SHIP_FILES[i]);
-  for (int i = 0; i < SHIP_NUMBER; i++) SunkImages[i] = loadImage(SHIP_FILES[i]);
+  for (int i = 0; i < SHIP_NUMBER; i++) SunkImages[i] = loadImage(SUNK_FILES[i]);
   loadingImage = loadImage(LOADING_FILE);
   burningImage = loadImage(BURNING_FILE);
   wonImage = loadImage(WON_FILE);
@@ -335,6 +340,12 @@ void draw()
             }
             
             input_1 = input_2 = -1;
+            
+            String write_s1 = "";
+            if (player == 1) write_s1 = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field2=&field4=&field6=";
+            else if (player == 2) write_s1 = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field1=&field3=&field5=";
+            GetRequest write_req = new GetRequest(write_s1);
+            write_req.send();
           }
         }
       }
@@ -370,8 +381,9 @@ void draw()
       input_1 = input_2 = -1;
     }
     
-    String write_s = "", read_s = "";
-    read_s = "https://api.thingspeak.com/channels/" + CHANNEL + "/feeds.json?results=1";
+    String write_s = "", read_s1 = "", read_s2 = "";
+    read_s1 = "https://api.thingspeak.com/channels/" + CHANNEL_P1 + "/feeds.json?results=1";
+    read_s2 = "https://api.thingspeak.com/channels/" + CHANNEL_P2 + "/feeds.json?results=1";
 
     drawGrid();
     drawShips();
@@ -383,12 +395,16 @@ void draw()
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
     if (frameCount % (FRAMERATE*16) == 0) {         
-      // Read
-      JSONArray feeds = (loadJSONObject(read_s)).getJSONArray("feeds");
+      // Read channel p1
+      JSONArray feeds = (loadJSONObject(read_s1)).getJSONArray("feeds");
       JSONObject latest_entry = feeds.getJSONObject(0, null);
       
+      // Read channel p2
+      JSONArray feeds_2 = (loadJSONObject(read_s2)).getJSONArray("feeds");
+      JSONObject latest_entry_2 = feeds_2.getJSONObject(0, null);
+      
       if (player == 1) {
-        if (latest_entry != null) {
+        if (latest_entry_2 != null) {
           p2_gs = latest_entry.getString("field2", p2_gs);
           p2_bs = latest_entry.getString("field4", p2_bs);
           p2_g = latest_entry.getString("field6", p2_g);
@@ -407,13 +423,13 @@ void draw()
         parseBoardState(p1_bs);
         parseGuess(p1_g);
       }
-      opp_guess_grid[opp_y][opp_x] = true;
-      if (opp_burning == 'b') opp_hits[opp_grid[opp_y][opp_x] - 1]++;
+      if ((opp_burning == 1) && (!opp_guess_grid[opp_y][opp_x])) opp_hits[opp_grid[opp_y][opp_x] - 1]++;
+      if ((opp_x >= 0) && (opp_y >= 0)) opp_guess_grid[opp_y][opp_x] = true;
       
       // Write
       if (turn == player) {
-        if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
-        else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
+        if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
+        else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P2+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
         GetRequest write_req = new GetRequest(write_s);
         write_req.send();
         println("Sending to: " + write_s);
@@ -430,6 +446,8 @@ void draw()
         port.write('N');
         port.write('\n');
       }
+      
+      for (int i = 0; i < 3; i++) println(opp_hits[i], SHIP_SIZES[i]);
     }
   }
   
