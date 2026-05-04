@@ -349,11 +349,11 @@ void draw()
         if (player == 1) p1_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
         else if (player == 2) p2_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
       }
-      input_1 = input_2 = 0;
+      input_1 = input_2 = -1;
     }
     
     String write_s = "", read_s = "";
-    read_s = "https://api.thingspeak.com/channels/3364309/feeds.json?results=1";
+    read_s = "https://api.thingspeak.com/channels/" + CHANNEL + "/feeds.json?results=1";
 
     drawGrid();
     drawShips();
