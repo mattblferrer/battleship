@@ -9,8 +9,8 @@ int CHANNEL = 3364309;
 String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 
 // Game constants
-int CANVAS_X = 900;
-int CANVAS_Y = 900;
+int CANVAS_X = 700;
+int CANVAS_Y = 700;
 int MARGIN = 50;
 int DOT_SIZE = 10;
 int DOT_X = 8;
@@ -37,7 +37,7 @@ int opp_x, opp_y, opp_burning;
 
 // File and display variables
 String[] SHIP_FILES = new String[SHIP_NUMBER];
-String LOADING_FILE = "loading_screen.png";
+String LOADING_FILE = "screen_loading.png";
 PImage[] ShipImages = new PImage[SHIP_NUMBER];
 PImage loadingImage;
 PFont font;
