@@ -48,6 +48,8 @@ PImage[] SunkImages = new PImage[SHIP_NUMBER];
 PImage loadingImage, burningImage, wonImage, lostImage;
 PFont font;
 String msg;
+boolean playerWon = false;
+boolean playerLost = false;
 
 // Keyboard variables
 char ENTER_KEY = 10;
@@ -112,7 +114,7 @@ void drawGuessed() {
       fill(255, 0, 0);
       if (opp_guess_grid[i][j] == true) {
         if (opp_grid[i][j] != 0) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
-        else ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
+        else ellipse(cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
       }
       fill(100);
     }
