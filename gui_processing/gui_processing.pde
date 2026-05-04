@@ -92,18 +92,18 @@ void drawShips() {
 
 void parseBoardState(String state) {
   if (state.length() < DOT_X*DOT_Y) return;
-  for (int i = 0; i < DOT_X; i++) {
-    for (int j = 0; j < DOT_Y; j++) {
-      if (state.charAt(i*DOT_X + j) == '0') continue;
-      opp_grid[i][j] = (state.charAt(i*DOT_X + j) - 'a' + 1);
+  for (int i = 0; i < DOT_Y; i++) {
+    for (int j = 0; j < DOT_X; j++) {
+      if (state.charAt(i*DOT_Y + j) == '0') continue;
+      opp_grid[i][j] = (state.charAt(i*DOT_Y + j) - 'a' + 1);
     }
   }
 }
 
 String encodeBoardState() {
   String ans = "";
-  for (int i = 0; i < DOT_X; i++) {
-    for (int j = 0; j < DOT_Y; j++) {
+  for (int i = 0; i < DOT_Y; i++) {
+    for (int j = 0; j < DOT_X; j++) {
       if (ship_grid[i][j] == 0) ans += '0';
       else ans += (char)(ship_grid[i][j] + 'a' - 1);
     }
@@ -120,7 +120,7 @@ void parseGuess(String guess) {
 }
 
 boolean burnCheck(int x, int y) {
-  return (opp_grid[x][y] != 0);
+  return (opp_grid[y][x] != 0);
 }
 
 void settings() {
@@ -243,7 +243,7 @@ void draw()
         boolean valid = true;
         if (rotate_ctr == 0) {
           for (int i = x_ctr; i < x_ctr + SHIP_SIZES[curr_ships]; i++) {
-            if (ship_grid[i][y_ctr] > 0) {
+            if (ship_grid[y_ctr][i] > 0) {
               valid = false;
               fill(240, 0, 0);
               ellipse(MARGIN + i*DOT_GAP_X + DOT_OFFSET_X, MARGIN + y_ctr*DOT_GAP_Y + DOT_OFFSET_Y, DOT_SIZE, DOT_SIZE);
@@ -253,7 +253,7 @@ void draw()
         }
         else {
           for (int i = y_ctr; i < y_ctr + SHIP_SIZES[curr_ships]; i++) {
-            if (ship_grid[x_ctr][i] > 0) {
+            if (ship_grid[i][x_ctr] > 0) {
               valid = false;
               fill(240, 0, 0);
               ellipse(MARGIN + x_ctr*DOT_GAP_X + DOT_OFFSET_X, MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y, DOT_SIZE, DOT_SIZE);
@@ -266,10 +266,10 @@ void draw()
           ship_details[curr_ships][1] = y_ctr;
           ship_details[curr_ships][2] = rotate_ctr;
           if (rotate_ctr == 0) {
-            for (int i = x_ctr; i < x_ctr + SHIP_SIZES[curr_ships]; i++) ship_grid[i][y_ctr] = curr_ships + 1;
+            for (int i = x_ctr; i < x_ctr + SHIP_SIZES[curr_ships]; i++) ship_grid[y_ctr][i] = curr_ships + 1;
           }
           else { 
-            for (int i = y_ctr; i < y_ctr + SHIP_SIZES[curr_ships]; i++) ship_grid[x_ctr][i] = curr_ships + 1;
+            for (int i = y_ctr; i < y_ctr + SHIP_SIZES[curr_ships]; i++) ship_grid[i][x_ctr] = curr_ships + 1;
           }
           
           x_ctr = 0;
@@ -321,8 +321,8 @@ void draw()
       input_2 = port.read();
       println("Input: ", input_1, " ", input_2);
       
-      if (!guess_grid[input_1][input_2]) {
-        guess_grid[input_1][input_2] = true;
+      if (!guess_grid[input_2][input_1]) {
+        guess_grid[input_2][input_1] = true;
         is_burning = burnCheck(input_1, input_2);
         port.write(input_1 + " " + input_2 + " " + ((is_burning) ? "1" : "0"));
         port.write("\nN\n");
@@ -389,7 +389,7 @@ void draw()
       }
       if (opp_burning == 'b') {
         fill(100, 0, 0);
-        ellipse(curr_x, curr_y, DOT_SIZE, DOT_SIZE);
+        ellipse(opp_x, opp_y, DOT_SIZE, DOT_SIZE);
         fill(100);
       }
     }
