@@ -36,7 +36,7 @@ int[][] ship_grid = new int[DOT_Y][DOT_X];
 int[][] opp_grid = new int[DOT_Y][DOT_X];
 boolean[][] guess_grid = new boolean[DOT_Y][DOT_X];
 boolean[][] opp_guess_grid = new boolean[DOT_Y][DOT_X];
-int opp_x, opp_y, opp_burning;
+int opp_x = -1, opp_y = -1, opp_burning = -1;
 
 // File and display variables
 String[] SHIP_FILES = new String[SHIP_NUMBER];
@@ -121,6 +121,8 @@ void drawGuessed() {
     }
   }
 }
+
+void draw
 
 void parseBoardState(String state) {
   if (state.length() < DOT_X*DOT_Y) return;
@@ -341,12 +343,15 @@ void draw()
             }
             
             input_1 = input_2 = -1;
-            
             String write_s = "";
             if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P2+"&field2=&field4=&field6=";
             else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field1=&field3=&field5=";
             GetRequest write_req = new GetRequest(write_s);
             write_req.send();
+            println("Sending to: " + write_s);
+            println("Reponse Content: " + write_req.getContent());
+            println("Reponse Content-Length Header: " + write_req.getHeader("Content-Length"));
+            
           }
         }
       }
@@ -389,6 +394,7 @@ void draw()
     drawGrid();
     drawShips();
     drawGuessed();
+    
     text("Guessing Phase", CANVAS_X/2, MARGIN/2);
     int time = 16 - ((frameCount % (FRAMERATE*16)) / FRAMERATE);
     msg = "Player " + turn + ": " + time + " seconds";
@@ -424,8 +430,10 @@ void draw()
         parseBoardState(p1_bs);
         parseGuess(p1_g);
       }
-      if ((opp_burning == 1) && (!opp_guess_grid[opp_y][opp_x])) opp_hits[opp_grid[opp_y][opp_x] - 1]++;
-      if ((opp_x >= 0) && (opp_y >= 0)) opp_guess_grid[opp_y][opp_x] = true;
+      if ((opp_x >= 0) && (opp_y >= 0)) {
+        if ((opp_grid[opp_y][opp_x] >= 1) && (!opp_guess_grid[opp_y][opp_x])) opp_hits[opp_grid[opp_y][opp_x] - 1]++;
+        opp_guess_grid[opp_y][opp_x] = true;
+      }
       
       // Check if all opp ships have sunk
       for (int i = 0; i < SHIP_NUMBER; i++) {
@@ -472,8 +480,6 @@ void draw()
         port.write('N');
         port.write('\n');
       }
-      
-      for (int i = 0; i < 3; i++) println(opp_hits[i], SHIP_SIZES[i]);
     }
   }
   
@@ -482,7 +488,8 @@ void draw()
     if (playerWon) {
       image(wonImage, 0, 0);
       wonImage.resize(CANVAS_X, CANVAS_Y);
-    } else {
+    } 
+    else {
       image(lostImage, 0, 0);
       lostImage.resize(CANVAS_X, CANVAS_Y);
     }
