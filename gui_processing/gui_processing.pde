@@ -3,9 +3,9 @@ import processing.serial.*;
 
 // Communication variables
 Serial port;
-String write_key = "K0M5M9E5SKGYF15A";
-String read_key = "7HS7C4DNV6P9EPE4";
-int channel = 3364309;
+String WRITE_KEY = "K0M5M9E5SKGYF15A";
+String READ_KEY = "7HS7C4DNV6P9EPE4";
+int CHANNEL = 3364309;
 String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 
 // Game constants
@@ -32,7 +32,7 @@ int[][] ship_details = new int[SHIP_NUMBER][3];
 int[][] ship_grid = new int[DOT_X][DOT_Y];
 int[][] opp_grid = new int[DOT_X][DOT_Y];
 boolean[][] guess_grid = new boolean[DOT_X][DOT_Y];
-int ship_x, ship_y, ship_rotate;
+int opp_x, opp_y, opp_burning;
 
 // File and display variables
 String[] SHIP_FILES = new String[SHIP_NUMBER];
@@ -91,6 +91,7 @@ void drawShips() {
 }
 
 void parseBoardState(String state) {
+  if (state.length() < DOT_X*DOT_Y) return;
   for (int i = 0; i < DOT_X; i++) {
     for (int j = 0; j < DOT_Y; j++) {
       if (state.charAt(i*DOT_X + j) == '0') continue;
@@ -109,6 +110,12 @@ String encodeBoardState() {
   }
   println(ans);
   return ans;
+}
+
+void parseGuess(String guess) {
+  opp_x = (int)guess.charAt(0);
+  opp_y = (int)guess.charAt(1);
+  opp_burning = (int)guess.charAt(2);
 }
 
 boolean burnCheck(int x, int y) {
@@ -305,6 +312,8 @@ void draw()
   
   // guessing phase
   else if (GAMESTATE == 2) {
+    boolean is_burning = false;
+    
     // get input from joystick
     while (port.available() > 1) {
       input_1 = port.read();
@@ -313,16 +322,15 @@ void draw()
       
       if (!guess_grid[input_1][input_2]) {
         guess_grid[input_1][input_2] = true;
-        boolean is_burning = burnCheck(input_1, input_2);
+        is_burning = burnCheck(input_1, input_2);
         port.write(input_1 + " " + input_2 + " " + ((is_burning) ? "1" : "0"));
-        port.write('N');
-        port.write('\n');
+        port.write("\nN\n");
       }
       input_1 = input_2 = 0;
     }
     
     String write_s = "", read_s = "";
-    write_s = "https://api.thingspeak.com/update?api_key="+write_key+"&field1="+p1_gs+"&field2="+p2_gs+"&field3="+p1_bs+"&field4="+p2_bs+"&field5="+p1_g+"&field6="+p2_g;
+    write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field2="+p2_gs+"&field3="+p1_bs+"&field4="+p2_bs+"&field5="+p1_g+"&field6="+p2_g;
     read_s = "https://api.thingspeak.com/channels/3364309/feeds.json?results=1";
 
     drawGrid();
@@ -334,6 +342,9 @@ void draw()
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
     if (frameCount % (FRAMERATE*16) == 0) {      
+      if (player == 1) p1_g = "" + (char)(input_1) + (char)(input_2) + ((is_burning) ? "1" : "0");
+      else if (player == 2) p2_g = "" + (char)(input_1) + (char)(input_2) + ((is_burning) ? "1" : "0");
+      
       GetRequest write_req = new GetRequest(write_s);
       write_req.send();
       println("Sending to: " + write_s);
@@ -351,7 +362,7 @@ void draw()
       }
     }
     
-    if (frameCount % FRAMERATE == 0) {
+    if (frameCount % (FRAMERATE*5) == 0) {
       JSONArray feeds = (loadJSONObject(read_s)).getJSONArray("feeds");
       JSONObject latest_entry = feeds.getJSONObject(0, null);
       if (latest_entry != null) {
@@ -363,6 +374,8 @@ void draw()
         p2_g = latest_entry.getString("field6", p2_g);
         println("Received: " + p1_gs + " " + p2_gs + " " + p1_bs + " " + p2_bs + " " + p1_g + " " + p2_g);
       }
+      if (player == 1) parseBoardState(p2_bs);
+      else if (player == 2) parseBoardState(p1_bs);
     }
   }
   
