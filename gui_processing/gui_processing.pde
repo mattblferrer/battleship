@@ -366,20 +366,24 @@ void draw()
     if (frameCount % (FRAMERATE*8) == 0) {
       JSONArray feeds = (loadJSONObject(read_s)).getJSONArray("feeds");
       JSONObject latest_entry = feeds.getJSONObject(0, null);
-      if (latest_entry != null) {
-        p1_gs = latest_entry.getString("field1", p1_gs);
-        p2_gs = latest_entry.getString("field2", p2_gs);
-        p1_bs = latest_entry.getString("field3", p1_bs);
-        p2_bs = latest_entry.getString("field4", p2_bs);
-        p1_g = latest_entry.getString("field5", p1_g);
-        p2_g = latest_entry.getString("field6", p2_g);
-        println("Received: " + p1_gs + " " + p2_gs + " " + p1_bs + " " + p2_bs + " " + p1_g + " " + p2_g);
-      }
+      
       if (player == 1) {
+        if (latest_entry != null) {
+          p2_gs = latest_entry.getString("field2", p2_gs);
+          p2_bs = latest_entry.getString("field4", p2_bs);
+          p2_g = latest_entry.getString("field6", p2_g);
+          println("Received: " + p2_gs + " " + p2_bs + " " + p2_g);
+        }
         parseBoardState(p2_bs);
         parseGuess(p2_g);
       }
       else if (player == 2) {
+        if (latest_entry != null) {
+          p1_gs = latest_entry.getString("field1", p1_gs);
+          p1_bs = latest_entry.getString("field3", p1_bs);
+          p1_g = latest_entry.getString("field5", p1_g);
+          println("Received: " + p1_gs + " " + p1_bs + " " + p1_g);
+        }
         parseBoardState(p1_bs);
         parseGuess(p1_g);
       }
