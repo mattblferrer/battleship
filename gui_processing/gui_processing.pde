@@ -39,9 +39,12 @@ int opp_x, opp_y, opp_burning;
 String[] SHIP_FILES = new String[SHIP_NUMBER];
 String[] SUNK_FILES = new String[SHIP_NUMBER];
 String LOADING_FILE = "screen_loading.png";
+String BURNING_FILE = "burning.jpg";
+String WON_FILE = "screen_won.png";
+String LOST_FILE = "screen_lost.png";
 PImage[] ShipImages = new PImage[SHIP_NUMBER];
 PImage[] SunkImages = new PImage[SHIP_NUMBER];
-PImage loadingImage;
+PImage loadingImage, burningImage, wonImage, lostImage;
 PFont font;
 String msg;
 
@@ -100,7 +103,7 @@ void drawGuessed() {
       cx = MARGIN + j*DOT_GAP_X + DOT_OFFSET_X;
       cy = MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y;
       fill(255, 0, 0);
-      if ((opp_guess_grid[i][j] == true) && (opp_grid[i][j] != '0')) ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
+      if ((opp_guess_grid[i][j] == true) && (opp_grid[i][j] != '0')) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4); // ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
       fill(100);
     }
   }
@@ -163,6 +166,9 @@ public void setup()
   for (int i = 0; i < SHIP_NUMBER; i++) ShipImages[i] = loadImage(SHIP_FILES[i]);
   for (int i = 0; i < SHIP_NUMBER; i++) SunkImages[i] = loadImage(SHIP_FILES[i]);
   loadingImage = loadImage(LOADING_FILE);
+  burningImage = loadImage(BURNING_FILE);
+  wonImage = loadImage(WON_FILE);
+  lostImage = loadImage(LOST_FILE);
   
   font = createFont("Arial", MARGIN/2, true);
   textFont(font);
@@ -414,6 +420,7 @@ void draw()
   
   // end phase
   else if (GAMESTATE == 3) {
-    
+    image(wonImage, 0, 0);
+    loadingImage.resize(CANVAS_X, CANVAS_Y);
   }
 }
