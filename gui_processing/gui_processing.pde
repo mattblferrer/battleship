@@ -114,9 +114,9 @@ String encodeBoardState() {
 
 void parseGuess(String guess) {
   if (guess.length() < 3) return;
-  opp_x = (int)guess.charAt(0);
-  opp_y = (int)guess.charAt(1);
-  opp_burning = (int)guess.charAt(2);
+  opp_x = (int)guess.charAt(0) - 'a';
+  opp_y = (int)guess.charAt(1) - 'a';
+  opp_burning = (int)guess.charAt(2) - 'a';
 }
 
 boolean burnCheck(int x, int y) {
@@ -343,8 +343,8 @@ void draw()
     
     //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
     if (frameCount % (FRAMERATE*16) == 0) {      
-      if (player == 1) p1_g = "" + (char)(input_1) + (char)(input_2) + ((is_burning) ? "1" : "0");
-      else if (player == 2) p2_g = "" + (char)(input_1) + (char)(input_2) + ((is_burning) ? "1" : "0");
+      if (player == 1) p1_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
+      else if (player == 2) p2_g = "" + (char)(input_1 + 'a') + (char)(input_2 + 'a') + ((is_burning) ? "b" : "a");
       
       GetRequest write_req = new GetRequest(write_s);
       write_req.send();
