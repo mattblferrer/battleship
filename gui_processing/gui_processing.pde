@@ -113,6 +113,7 @@ String encodeBoardState() {
 }
 
 void parseGuess(String guess) {
+  if (guess.length() < 3) return;
   opp_x = (int)guess.charAt(0);
   opp_y = (int)guess.charAt(1);
   opp_burning = (int)guess.charAt(2);
@@ -362,7 +363,7 @@ void draw()
       }
     }
     
-    if (frameCount % (FRAMERATE*5) == 0) {
+    if (frameCount % (FRAMERATE*8) == 0) {
       JSONArray feeds = (loadJSONObject(read_s)).getJSONArray("feeds");
       JSONObject latest_entry = feeds.getJSONObject(0, null);
       if (latest_entry != null) {
@@ -374,8 +375,19 @@ void draw()
         p2_g = latest_entry.getString("field6", p2_g);
         println("Received: " + p1_gs + " " + p2_gs + " " + p1_bs + " " + p2_bs + " " + p1_g + " " + p2_g);
       }
-      if (player == 1) parseBoardState(p2_bs);
-      else if (player == 2) parseBoardState(p1_bs);
+      if (player == 1) {
+        parseBoardState(p2_bs);
+        parseGuess(p2_g);
+      }
+      else if (player == 2) {
+        parseBoardState(p1_bs);
+        parseGuess(p1_g);
+      }
+      if (opp_burning == 1) {
+        fill(100, 0, 0);
+        ellipse(curr_x, curr_y, DOT_SIZE, DOT_SIZE);
+        fill(100);
+      }
     }
   }
   
