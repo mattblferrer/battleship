@@ -42,7 +42,7 @@ int opp_x, opp_y, opp_burning;
 String[] SHIP_FILES = new String[SHIP_NUMBER];
 String[] SUNK_FILES = new String[SHIP_NUMBER];
 String LOADING_FILE = "screen_loading.png";
-String BURNING_FILE = "burning.jpg";
+String BURNING_FILE = "burning.png";
 String WON_FILE = "screen_won.png";
 String LOST_FILE = "screen_lost.png";
 PImage[] ShipImages = new PImage[SHIP_NUMBER];
@@ -50,6 +50,7 @@ PImage[] SunkImages = new PImage[SHIP_NUMBER];
 PImage loadingImage, burningImage, wonImage, lostImage;
 PFont font;
 String msg;
+boolean playerWon = false;
 
 // Keyboard variables
 char ENTER_KEY = 10;
@@ -113,8 +114,8 @@ void drawGuessed() {
       cy = MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y;
       fill(255, 0, 0);
       if (opp_guess_grid[i][j] == true) {
-        if (opp_grid[i][j] == 0) ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
-        else image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
+        if (opp_grid[i][j] != 0) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
+        else ellipse(cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
       }
       fill(100);
     }
@@ -453,7 +454,11 @@ void draw()
   
   // end phase
   else if (GAMESTATE == 3) {
-    image(wonImage, 0, 0);
-    loadingImage.resize(CANVAS_X, CANVAS_Y);
-  }
+    if (playerWon) {
+      image(wonImage, 0, 0);
+      wonImage.resize(CANVAS_X, CANVAS_Y);
+    } else {
+      image(lostImage, 0, 0);
+      lostImage.resize(CANVAS_X, CANVAS_Y);
+    }
 }
