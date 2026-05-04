@@ -31,6 +31,7 @@ int rotate_ctr = 0, x_ctr = 0, y_ctr = 0;
 int x_left, x_right, y_top, y_bottom;
 int curr_ships = 0;
 int[][] ship_details = new int[SHIP_NUMBER][3];
+int[] my_hits = new int[SHIP_NUMBER];
 int[] opp_hits = new int[SHIP_NUMBER];
 int[][] ship_grid = new int[DOT_Y][DOT_X];
 int[][] opp_grid = new int[DOT_Y][DOT_X];
@@ -413,33 +414,33 @@ void draw()
         parseGuess(p1_g);
       }
       if ((opp_x >= 0) && (opp_y >= 0)) {
-        if ((opp_grid[opp_y][opp_x] >= 1) && (!opp_guess_grid[opp_y][opp_x])) opp_hits[opp_grid[opp_y][opp_x] - 1]++;
+        if ((ship_grid[opp_y][opp_x] >= 1) && (!opp_guess_grid[opp_y][opp_x])) opp_hits[ship_grid[opp_y][opp_x] - 1]++;
         opp_guess_grid[opp_y][opp_x] = true;
       }
 
       // Check if all opp ships have sunk
-      boolean iWon = true;
+      boolean iLost = true;
       for (int i = 0; i < SHIP_NUMBER; i++) {
         if (opp_hits[i] < SHIP_SIZES[i]) {
-          iWon = false;
+          iLost = false;
           break;
         }
       }
 
       // Player triggers win condition
-      if (iWon) {
-        if (player == 1) p1_gs = "3";
-        else if (player == 2) p2_gs = "3";
-        playerWon = true;
+      if (iLost) {
+        if (player == 1) p2_gs = "3";
+        else if (player == 2) p1_gs = "3";
+        playerWon = false;
         GAMESTATE = 3;
       }
 
-      // If opponent has already marked player as lost
-      if (player == 1 && p1_gs.equals("3")) iLost = true;
-      if (player == 2 && p2_gs.equals("3")) iLost = true;
+      // If opponent has already marked player as won
+      if (player == 1 && p1_gs.equals("3")) iWon = true;
+      if (player == 2 && p2_gs.equals("3")) iWon = true;
 
-      if (iLost) {
-        playerWon = false;
+      if (iWon) {
+        playerWon = true;
         GAMESTATE = 3;
       }
 
@@ -463,8 +464,8 @@ void draw()
         port.write('\n');
       }
       
-      println("Current score: ");
-      for (int i = 0; i < 3; i++) print("Ship ", i, " ", opp_hits[i], "/",  SHIP_SIZES[i]);
+      println("Opponent score: ");
+      for (int i = 0; i < 3; i++) println("Ship ", i, ": ", opp_hits[i], "/",  SHIP_SIZES[i]);
     }
   }
 
