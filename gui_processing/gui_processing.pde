@@ -387,7 +387,7 @@ void draw()
         parseBoardState(p1_bs);
         parseGuess(p1_g);
       }
-      if (opp_burning == 1) {
+      if (opp_burning == 'b') {
         fill(100, 0, 0);
         ellipse(curr_x, curr_y, DOT_SIZE, DOT_SIZE);
         fill(100);
