@@ -69,7 +69,7 @@ void precomp() {
 
 void drawGrid() {
   background(255);
-  for (int i = 0; i < DOT_X; i++) { 
+  for (int i = 0; i < DOT_X; i++) {
     for (int j = 0; j < DOT_Y; j++) {
       fill(100);
       curr_x = MARGIN + DOT_GAP_X*i + DOT_OFFSET_X;
@@ -87,18 +87,16 @@ void drawShips() {
     if (ship_details[i][2] == 0) {
       cx = MARGIN + ship_details[i][0]*DOT_GAP_X;
       cy = MARGIN + ship_details[i][1]*DOT_GAP_Y;
-    }
-    else {
+    } else {
       cx = MARGIN + DOT_GAP_X + ship_details[i][0]*DOT_GAP_X;
       cy = MARGIN + ship_details[i][1]*DOT_GAP_Y;
     }
     translate(cx, cy);
-    rotate(HALF_PI*ship_details[i][2]); 
+    rotate(HALF_PI*ship_details[i][2]);
     if (opp_hits[i] >= SHIP_SIZES[i]) {
       if (ship_details[i][2] == 0) image(SunkImages[i], 0, 0, DOT_GAP_X*SHIP_SIZES[i], DOT_GAP_Y);
       else image(SunkImages[i], 0, 0, DOT_GAP_Y*SHIP_SIZES[i], DOT_GAP_X);
-    }
-    else {
+    } else {
       if (ship_details[i][2] == 0) image(ShipImages[i], 0, 0, DOT_GAP_X*SHIP_SIZES[i], DOT_GAP_Y);
       else image(ShipImages[i], 0, 0, DOT_GAP_Y*SHIP_SIZES[i], DOT_GAP_X);
     }
@@ -106,10 +104,10 @@ void drawShips() {
   }
 }
 
-void drawGuessed() { 
+void drawGuessed() {
   int cx, cy;
   for (int i = 0; i < DOT_Y; i++) {
-    for (int j = 0; j < DOT_X; j++) { 
+    for (int j = 0; j < DOT_X; j++) {
       cx = MARGIN + j*DOT_GAP_X + DOT_OFFSET_X;
       cy = MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y;
       fill(255, 0, 0);
@@ -130,7 +128,6 @@ void parseBoardState(String state) {
       if (state.charAt(i*DOT_X + j) == '0') continue;
       opp_grid[i][j] = (state.charAt(i*DOT_X + j) - 'a' + 1);
     }
-    println();
   }
 }
 
@@ -166,7 +163,7 @@ public void setup()
 {
   // Open the port that the board is connected to and use the same speed (9600 bps)
   port = new Serial(this, Serial.list()[0], 9600);
-  
+
   precomp();
   frameRate(FRAMERATE);
   imageMode(CORNER);
@@ -183,42 +180,42 @@ public void setup()
   burningImage = loadImage(BURNING_FILE);
   wonImage = loadImage(WON_FILE);
   lostImage = loadImage(LOST_FILE);
-  
+
   font = createFont("Arial", MARGIN/2, true);
   textFont(font);
   textAlign(CENTER);
   println("Welcome to Battleship!");
 }
 
-void draw() 
-{ 
+void draw()
+{
   // loading screen
   if (GAMESTATE == 0) {
     port.write('R');
     port.write('\n');
-    
+
     // get input from joystick
     while (port.available() > 0) {
       input_1 = port.read();
       println("Input: ", input_1);
     }
-  
+
     image(loadingImage, 0, 0);
     loadingImage.resize(CANVAS_X, CANVAS_Y);
     if ((keyPressed) || (input_1 != 0)) {
-       if ((key == UP_KEY) || (input_1 == 'u')) {
-         GAMESTATE = 1;
-         player = 1;
-       }
-       if ((key == DOWN_KEY) || (input_1 == 'd')) {
-         GAMESTATE = 1;
-         player = 2;
-       }
-       key = 0;
-       input_1 = 0;
+      if ((key == UP_KEY) || (input_1 == 'u')) {
+        GAMESTATE = 1;
+        player = 1;
+      }
+      if ((key == DOWN_KEY) || (input_1 == 'd')) {
+        GAMESTATE = 1;
+        player = 2;
+      }
+      key = 0;
+      input_1 = 0;
     }
   }
-  
+
   // setup phase
   else if (GAMESTATE == 1) {
     // get input from joystick
@@ -226,14 +223,14 @@ void draw()
       input_1 = port.read();
       println("Input: ", input_1);
     }
-    
+
     // redraw grid with ship
     drawGrid();
     drawShips();
     pushMatrix();
-    
+
     text("Player " + player + " Setup Phase", CANVAS_X/2, MARGIN/2);
-    
+
     if (rotate_ctr == 0) {
       curr_x = MARGIN + x_ctr*DOT_GAP_X;
       curr_y = MARGIN + y_ctr*DOT_GAP_Y;
@@ -241,8 +238,7 @@ void draw()
       x_right = curr_x + DOT_GAP_X*SHIP_SIZES[curr_ships];
       y_top = curr_y;
       y_bottom = curr_y + DOT_GAP_Y;
-    }
-    else {
+    } else {
       curr_x = MARGIN + DOT_GAP_X + x_ctr*DOT_GAP_X;
       curr_y = MARGIN + y_ctr*DOT_GAP_Y;
       x_left = curr_x - DOT_GAP_X;
@@ -251,34 +247,30 @@ void draw()
       y_bottom = curr_y + DOT_GAP_Y*SHIP_SIZES[curr_ships];
     }
     translate(curr_x, curr_y);
-    rotate(HALF_PI*rotate_ctr); 
+    rotate(HALF_PI*rotate_ctr);
     if (rotate_ctr == 0) image(ShipImages[curr_ships], 0, 0, DOT_GAP_X*SHIP_SIZES[curr_ships], DOT_GAP_Y);
     else image(ShipImages[curr_ships], 0, 0, DOT_GAP_Y*SHIP_SIZES[curr_ships], DOT_GAP_X);
-    popMatrix(); 
-    
+    popMatrix();
+
     if ((keyPressed) || (input_1 != 0)) {
       if ((key == ROTATE_KEY) || (input_1 == 'R')) rotate_ctr = (rotate_ctr <= 0) ? 1 : 0;
       else if ((key == LEFT_KEY) || (input_1 == 'l')) {
         x_ctr--;
         x_left -= DOT_GAP_X;
         x_right -= DOT_GAP_X;
-      }
-      else if ((key == RIGHT_KEY) || (input_1 == 'r')) {
+      } else if ((key == RIGHT_KEY) || (input_1 == 'r')) {
         x_ctr++;
         x_left += DOT_GAP_X;
         x_right += DOT_GAP_X;
-      }
-      else if ((key == UP_KEY) || (input_1 == 'u')) {
+      } else if ((key == UP_KEY) || (input_1 == 'u')) {
         y_ctr--;
         y_top -= DOT_GAP_Y;
         y_bottom -= DOT_GAP_Y;
-      }
-      else if ((key == DOWN_KEY) || (input_1 == 'd')) {
+      } else if ((key == DOWN_KEY) || (input_1 == 'd')) {
         y_ctr++;
         y_top += DOT_GAP_Y;
         y_bottom += DOT_GAP_Y;
-      }
-      else if ((key == ENTER_KEY) || (input_1 == 'C')) {
+      } else if ((key == ENTER_KEY) || (input_1 == 'C')) {
         // check for collisions
         boolean valid = true;
         if (rotate_ctr == 0) {
@@ -290,8 +282,7 @@ void draw()
               fill(100);
             }
           }
-        }
-        else {
+        } else {
           for (int i = y_ctr; i < y_ctr + SHIP_SIZES[curr_ships]; i++) {
             if (ship_grid[i][x_ctr] > 0) {
               valid = false;
@@ -307,15 +298,14 @@ void draw()
           ship_details[curr_ships][2] = rotate_ctr;
           if (rotate_ctr == 0) {
             for (int i = x_ctr; i < x_ctr + SHIP_SIZES[curr_ships]; i++) ship_grid[y_ctr][i] = curr_ships + 1;
-          }
-          else { 
+          } else {
             for (int i = y_ctr; i < y_ctr + SHIP_SIZES[curr_ships]; i++) ship_grid[i][x_ctr] = curr_ships + 1;
           }
-          
+
           x_ctr = 0;
           y_ctr = 0;
           curr_ships++;
-          
+
           if (curr_ships >= SHIP_NUMBER) {
             GAMESTATE = 2;
             port.write('G');
@@ -323,21 +313,19 @@ void draw()
             if (player == 1) {
               p1_bs = encodeBoardState();
               println("Encoded board state: ", p1_bs);
-            }
-            else if (player == 2) {
+            } else if (player == 2) {
               p2_bs = encodeBoardState();
               println("Encoded board state: ", p2_bs);
             }
-            
+
             if (turn == player) {
               port.write('Y');
               port.write('\n');
-            }
-            else {
+            } else {
               port.write('N');
               port.write('\n');
             }
-            
+
             input_1 = input_2 = -1;
             String write_s = "";
             if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P2+"&field2=&field4=&field6=";
@@ -347,12 +335,11 @@ void draw()
             println("Sending to: " + write_s);
             println("Reponse Content: " + write_req.getContent());
             println("Reponse Content-Length Header: " + write_req.getHeader("Content-Length"));
-            
           }
         }
       }
-      
-      // bounds checking 
+
+      // bounds checking
       if (x_left < MARGIN) x_ctr++;
       if (x_right > CANVAS_X - MARGIN) x_ctr--;
       if (y_top < MARGIN) y_ctr++;
@@ -361,17 +348,17 @@ void draw()
       input_1 = 0;
     }
   }
-  
+
   // guessing phase
   else if (GAMESTATE == 2) {
     boolean is_burning = false;
-    
+
     // get input from joystick
     while (port.available() > 1) {
       input_1 = port.read();
       input_2 = port.read();
       println("Input: ", input_1, " ", input_2);
-      
+
       if (!guess_grid[input_2][input_1]) {
         guess_grid[input_2][input_1] = true;
         is_burning = burnCheck(input_1, input_2);
@@ -382,7 +369,7 @@ void draw()
       }
       input_1 = input_2 = -1;
     }
-    
+
     String write_s = "", read_s1 = "", read_s2 = "";
     read_s1 = "https://api.thingspeak.com/channels/" + CHANNEL_P1 + "/feeds.json?results=1";
     read_s2 = "https://api.thingspeak.com/channels/" + CHANNEL_P2 + "/feeds.json?results=1";
@@ -390,22 +377,22 @@ void draw()
     drawGrid();
     drawShips();
     drawGuessed();
-    
+
     text("Guessing Phase", CANVAS_X/2, MARGIN/2);
     int time = 16 - ((frameCount % (FRAMERATE*16)) / FRAMERATE);
     msg = "Player " + turn + ": " + time + " seconds";
     text(msg, CANVAS_X/2, MARGIN);
-    
-    //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing  
-    if (frameCount % (FRAMERATE*16) == 0) {         
+
+    //for free, you can only send (fastest) at 15 sec or more, setting 16 sec interval for writing
+    if (frameCount % (FRAMERATE*16) == 0) {
       // Read channel p1
       JSONArray feeds = (loadJSONObject(read_s1)).getJSONArray("feeds");
       JSONObject latest_entry = feeds.getJSONObject(0, null);
-      
+
       // Read channel p2
       JSONArray feeds_2 = (loadJSONObject(read_s2)).getJSONArray("feeds");
       JSONObject latest_entry_2 = feeds_2.getJSONObject(0, null);
-      
+
       if (player == 1) {
         if (latest_entry_2 != null) {
           p2_gs = latest_entry_2.getString("field2", p2_gs);
@@ -415,8 +402,7 @@ void draw()
         }
         parseBoardState(p2_bs);
         parseGuess(p2_g);
-      }
-      else if (player == 2) {
+      } else if (player == 2) {
         if (latest_entry != null) {
           p1_gs = latest_entry.getString("field1", p1_gs);
           p1_bs = latest_entry.getString("field3", p1_bs);
@@ -430,7 +416,7 @@ void draw()
         if ((opp_grid[opp_y][opp_x] >= 1) && (!opp_guess_grid[opp_y][opp_x])) opp_hits[opp_grid[opp_y][opp_x] - 1]++;
         opp_guess_grid[opp_y][opp_x] = true;
       }
-      
+
       // Check if all opp ships have sunk
       boolean iWon = true;
       for (int i = 0; i < SHIP_NUMBER; i++) {
@@ -439,7 +425,7 @@ void draw()
           break;
         }
       }
-      
+
       // Player triggers win condition
       if (iWon) {
         if (player == 1) p1_gs = "3";
@@ -447,16 +433,16 @@ void draw()
         playerWon = true;
         GAMESTATE = 3;
       }
-      
+
       // If opponent has already marked player as lost
       if (player == 1 && p1_gs.equals("3")) iLost = true;
       if (player == 2 && p2_gs.equals("3")) iLost = true;
-      
+
       if (iLost) {
         playerWon = false;
         GAMESTATE = 3;
       }
-      
+
       // Write
       if (turn == player) {
         if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
@@ -472,21 +458,22 @@ void draw()
       if (turn == player) {
         port.write('Y');
         port.write('\n');
-      }
-      else {
+      } else {
         port.write('N');
         port.write('\n');
       }
+      
+      println("Current score: ");
+      for (int i = 0; i < 3; i++) print("Ship ", i, " ", opp_hits[i], "/",  SHIP_SIZES[i]);
     }
   }
-  
+
   // end phase
   else if (GAMESTATE == 3) {
     if (playerWon) {
       image(wonImage, 0, 0);
       wonImage.resize(CANVAS_X, CANVAS_Y);
-    } 
-    else {
+    } else {
       image(lostImage, 0, 0);
       lostImage.resize(CANVAS_X, CANVAS_Y);
     }
