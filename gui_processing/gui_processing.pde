@@ -114,7 +114,7 @@ void drawGuessed() {
       cy = MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y;
       fill(255, 0, 0);
       if (opp_guess_grid[i][j] == true) {
-        if (opp_grid[i][j] != 0) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
+        if (ship_grid[i][j] != 0) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
         else ellipse(cx, cy, DOT_SIZE*3, DOT_SIZE*3);
       }
       fill(100);
@@ -127,9 +127,7 @@ void parseBoardState(String state) {
   for (int i = 0; i < DOT_Y; i++) {
     for (int j = 0; j < DOT_X; j++) {
       opp_grid[i][j] = 0;
-      if (state.charAt(i*DOT_X + j) == '0') {
-        continue;
-      }
+      if (state.charAt(i*DOT_X + j) == '0') continue;
       opp_grid[i][j] = (state.charAt(i*DOT_X + j) - 'a' + 1);
     }
     println();
