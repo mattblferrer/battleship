@@ -429,15 +429,15 @@ void draw()
 
       // Player triggers win condition
       if (iLost) {
-        if (player == 1) p2_gs = "3";
-        else if (player == 2) p1_gs = "3";
+        if (player == 1) p1_gs = "3";
+        else if (player == 2) p2_gs = "3";
         playerWon = false;
         GAMESTATE = 3;
       }
 
       // If opponent has already marked player as won
-      if (player == 1 && p1_gs.equals("3")) iWon = true;
-      if (player == 2 && p2_gs.equals("3")) iWon = true;
+      if (player == 1 && p2_gs.equals("3")) iWon = true;
+      if (player == 2 && p1_gs.equals("3")) iWon = true;
 
       if (iWon) {
         playerWon = true;
@@ -477,6 +477,22 @@ void draw()
     } else {
       image(lostImage, 0, 0);
       lostImage.resize(CANVAS_X, CANVAS_Y);
+    }
+    
+    // get input from joystick
+    input_1 = 0;
+    while (port.available() > 0) {
+      input_1 = port.read();
+      println("Input: ", input_1);
+    }
+    
+    if ((keyPressed) || (input_1 != 0)) {
+      if ((key == ENTER_KEY) || (input_1 == 'C')) {
+        GAMESTATE = 0;
+        port.write('R');
+      }
+      key = 0;
+      input_1 = 0;
     }
   }
 }
