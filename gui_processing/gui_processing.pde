@@ -50,7 +50,7 @@ PImage[] SunkImages = new PImage[SHIP_NUMBER];
 PImage loadingImage, burningImage, wonImage, lostImage;
 PFont font;
 String msg;
-boolean playerWon = false;
+boolean iWon = false, iLost = false, playerWon = false;
 
 // Keyboard variables
 char ENTER_KEY = 10;
@@ -343,8 +343,8 @@ void draw()
             input_1 = input_2 = -1;
             
             String write_s = "";
-            if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field2=&field4=&field6=";
-            else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P2+"&field1=&field3=&field5=";
+            if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P2+"&field2=&field4=&field6=";
+            else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field1=&field3=&field5=";
             GetRequest write_req = new GetRequest(write_s);
             write_req.send();
           }
@@ -426,6 +426,31 @@ void draw()
       }
       if ((opp_burning == 1) && (!opp_guess_grid[opp_y][opp_x])) opp_hits[opp_grid[opp_y][opp_x] - 1]++;
       if ((opp_x >= 0) && (opp_y >= 0)) opp_guess_grid[opp_y][opp_x] = true;
+      
+      // Check if all opp ships have sunk
+      for (int i = 0; i < SHIP_NUMBER; i++) {
+        if (opp_hits[i] >= SHIP_SIZES[i]) {
+          iWon = true;
+          break;
+        }
+      }
+      
+      // Player triggers win condition
+      if (GAMESTATE != 3 && iWon) {
+        if (player == 1) p2_gs = "3";
+        else if (player == 1) p2_gs = "3";
+        playerWon = true;
+        GAMESTATE = 3;
+      }
+      
+      // If opponent has already marked player as lost
+      if (player == 1 && p1_gs.equals("3")) iLost = true;
+      if (player == 2 && p2_gs.equals("3")) iLost = true;
+      
+      if (iLost) {
+        playerWon = false;
+        GAMESTATE = 3;
+      }
       
       // Write
       if (turn == player) {
