@@ -99,7 +99,7 @@ void drawGuessed() {
     for (int j = 0; j < DOT_X; j++) { 
       cx = MARGIN + j*DOT_GAP_X + DOT_OFFSET_X;
       cy = MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y;
-      fill(100, 0, 0);
+      fill(255, 0, 0);
       if ((opp_guess_grid[i][j] == true) && (opp_grid[i][j] != '0')) ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
       fill(100);
     }
