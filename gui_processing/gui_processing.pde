@@ -7,7 +7,7 @@ String WRITE_KEY_P1 = "K0M5M9E5SKGYF15A";
 //String READ_KEY_P1 = "7HS7C4DNV6P9EPE4";
 String WRITE_KEY_P2 = "79ZR9765YVIEVIS6";
 int CHANNEL_P1 = 3364309;
-int CHANNEL_P2 = 3368258;
+int CHANNEL_P2 = 3368248;
 String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 
 // Game constants
@@ -342,10 +342,10 @@ void draw()
             
             input_1 = input_2 = -1;
             
-            String write_s1 = "";
-            if (player == 1) write_s1 = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field2=&field4=&field6=";
-            else if (player == 2) write_s1 = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field1=&field3=&field5=";
-            GetRequest write_req = new GetRequest(write_s1);
+            String write_s = "";
+            if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P1+"&field2=&field4=&field6=";
+            else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY_P2+"&field1=&field3=&field5=";
+            GetRequest write_req = new GetRequest(write_s);
             write_req.send();
           }
         }
@@ -461,4 +461,5 @@ void draw()
       image(lostImage, 0, 0);
       lostImage.resize(CANVAS_X, CANVAS_Y);
     }
+  }
 }
