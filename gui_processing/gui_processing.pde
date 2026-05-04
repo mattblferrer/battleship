@@ -29,6 +29,7 @@ int rotate_ctr = 0, x_ctr = 0, y_ctr = 0;
 int x_left, x_right, y_top, y_bottom;
 int curr_ships = 0;
 int[][] ship_details = new int[SHIP_NUMBER][3];
+int[] opp_hits = new int[SHIP_NUMBER];
 int[][] ship_grid = new int[DOT_Y][DOT_X];
 int[][] opp_grid = new int[DOT_Y][DOT_X];
 boolean[][] guess_grid = new boolean[DOT_Y][DOT_X];
@@ -87,8 +88,14 @@ void drawShips() {
     }
     translate(cx, cy);
     rotate(HALF_PI*ship_details[i][2]); 
-    if (ship_details[i][2] == 0) image(ShipImages[i], 0, 0, DOT_GAP_X*SHIP_SIZES[i], DOT_GAP_Y);
-    else image(ShipImages[i], 0, 0, DOT_GAP_Y*SHIP_SIZES[i], DOT_GAP_X);
+    if (opp_hits[i] == SHIP_SIZES[i]) {
+      if (ship_details[i][2] == 0) image(SunkImages[i], 0, 0, DOT_GAP_X*SHIP_SIZES[i], DOT_GAP_Y);
+      else image(SunkImages[i], 0, 0, DOT_GAP_Y*SHIP_SIZES[i], DOT_GAP_X);
+    }
+    else {
+      if (ship_details[i][2] == 0) image(ShipImages[i], 0, 0, DOT_GAP_X*SHIP_SIZES[i], DOT_GAP_Y);
+      else image(ShipImages[i], 0, 0, DOT_GAP_Y*SHIP_SIZES[i], DOT_GAP_X);
+    }
     popMatrix();
   }
 }
@@ -317,6 +324,8 @@ void draw()
               port.write('N');
               port.write('\n');
             }
+            
+            input_1 = input_2 = -1;
           }
         }
       }
