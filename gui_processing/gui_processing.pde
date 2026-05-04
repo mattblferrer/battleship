@@ -12,7 +12,7 @@ String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 int CANVAS_X = 700;
 int CANVAS_Y = 700;
 int MARGIN = 50;
-int DOT_SIZE = 10;
+int DOT_SIZE = (min(CANVAS_X, CANVAS_Y) - MARGIN*2) / 80;
 int DOT_X = 8;
 int DOT_Y = 8;
 int GAMESTATE = 0;
