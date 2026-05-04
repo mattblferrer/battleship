@@ -111,7 +111,7 @@ void drawGuessed() {
       cy = MARGIN + i*DOT_GAP_Y + DOT_OFFSET_Y;
       fill(255, 0, 0);
       if (opp_guess_grid[i][j] == true) {
-        if (opp_grid[i][j] != '0') image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
+        if (opp_grid[i][j] != 0) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
         else ellipse(cx, cy, DOT_SIZE, DOT_SIZE);
       }
       fill(100);
@@ -408,15 +408,18 @@ void draw()
         parseGuess(p1_g);
       }
       opp_guess_grid[opp_y][opp_x] = true;
+      if (opp_burning == 'b') opp_hits[opp_grid[opp_y][opp_x] - 1]++;
       
       // Write
-      if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
-      else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
-      GetRequest write_req = new GetRequest(write_s);
-      write_req.send();
-      println("Sending to: " + write_s);
-      println("Reponse Content: " + write_req.getContent());
-      println("Reponse Content-Length Header: " + write_req.getHeader("Content-Length"));
+      if (turn == player) {
+        if (player == 1) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field1="+p1_gs+"&field3="+p1_bs+"&field5="+p1_g;
+        else if (player == 2) write_s = "https://api.thingspeak.com/update?api_key="+WRITE_KEY+"&field2="+p2_gs+"&field4="+p2_bs+"&field6="+p2_g;
+        GetRequest write_req = new GetRequest(write_s);
+        write_req.send();
+        println("Sending to: " + write_s);
+        println("Reponse Content: " + write_req.getContent());
+        println("Reponse Content-Length Header: " + write_req.getHeader("Content-Length"));
+      }
       turn = (turn == 1) ? 2 : 1;
       println("Player " + turn + "'s turn");
       if (turn == player) {
