@@ -8,6 +8,7 @@ String WRITE_KEY_P1 = "K0M5M9E5SKGYF15A";
 String WRITE_KEY_P2 = "79ZR9765YVIEVIS6";
 int CHANNEL_P1 = 3364309;
 int CHANNEL_P2 = 3368248;
+int CHANNEL_P2 = 3368248;
 String p1_gs = "", p2_gs = "", p1_bs = "", p2_bs = "", p1_g = "", p2_g = "";
 
 // Game constants
@@ -115,7 +116,7 @@ void drawGuessed() {
       fill(255, 0, 0);
       if (opp_guess_grid[i][j] == true) {
         if (opp_grid[i][j] != 0) image(burningImage, cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
-        else ellipse(cx-(DOT_SIZE*2), cy-(DOT_SIZE*2), DOT_SIZE*4, DOT_SIZE*4);
+        else ellipse(cx, cy, DOT_SIZE*3, DOT_SIZE*3);
       }
       fill(100);
     }
