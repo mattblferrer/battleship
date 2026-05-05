@@ -487,9 +487,10 @@ void draw()
     }
     
     if ((keyPressed) || (input_1 != 0)) {
-      if ((key == ENTER_KEY) || (input_1 == 'C')) {
+      if ((key == ENTER_KEY) || (input_1 == 'R')) {
         GAMESTATE = 0;
         port.write('R');
+        port.write('\n');
       }
       key = 0;
       input_1 = 0;
