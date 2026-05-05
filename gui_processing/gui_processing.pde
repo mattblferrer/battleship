@@ -463,9 +463,9 @@ void draw()
         port.write('N');
         port.write('\n');
       }
-      
+
       println("Opponent score: ");
-      for (int i = 0; i < 3; i++) println("Ship ", i, ": ", opp_hits[i], "/",  SHIP_SIZES[i]);
+      for (int i = 0; i < 3; i++) println("Ship ", i, ": ", opp_hits[i], "/", SHIP_SIZES[i]);
     }
   }
 
@@ -478,14 +478,14 @@ void draw()
       image(lostImage, 0, 0);
       lostImage.resize(CANVAS_X, CANVAS_Y);
     }
-    
+
     // get input from joystick
     input_1 = 0;
     while (port.available() > 0) {
       input_1 = port.read();
       println("Input: ", input_1);
     }
-    
+
     if ((keyPressed) || (input_1 != 0)) {
       if ((key == ENTER_KEY) || (input_1 == 'R')) {
         GAMESTATE = 0;
